@@ -1,22 +1,25 @@
-## MAC OS
-.DS_Store
-
-## TEXTMATE
-*.tmproj
-tmtags
-
-## EMACS
-*~
-\#*
-.\#*
-
-## VIM
-*.swp
-
-## PROJECT::GENERAL
-coverage
-doc
-rdoc
 *.gem
-
-## PROJECT::SPECIFIC
+*.rbc
+.bundle
+.config
+.yardoc
+Gemfile.lock
+InstalledFiles
+_yardoc
+coverage/
+doc/
+docs/
+lib/bundler/man
+pkg
+rdoc
+spec/reports
+test/tmp
+test/version_tmp
+tmp
+.DS_Store
+.rspec
+vendor/
+bin/
+vendor.noindex/
+.ruby-version
+config/
