@@ -1,10 +1,19 @@
 # frozen_string_literal: true
 source "https://rubygems.org"
 
-git_source(:github) {|repo_name| "https://github.com/#{repo_name}" }
-
-gem "rake"
 gem "sequel"
-gem "sqlite3"
-gem "rspec"
-gem "yard"
+
+group :development do
+  gem "rake"
+  gem "pry-byebug"
+  gem "pry-state"
+  gem "yard"
+end
+
+group :testing do
+  gem "sqlite3"
+  gem "rspec"
+  gem "rspec-its"
+  gem "rspec-given"
+  gem "simplecov"
+end

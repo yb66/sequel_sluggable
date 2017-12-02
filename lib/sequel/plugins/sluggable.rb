@@ -8,10 +8,28 @@ module Sequel
     # You need to have "target" column in your model.
     module Sluggable
       DEFAULT_TARGET_COLUMN = :slug
+      DEFAULT_TARGET_COLUMN.freeze
 
-      # Plugin configuration
-      def self.configure(model, opts={})
-        model.sluggable_options = opts
+
+      # @param frozen    [Boolean]      :Is slug frozen, default true
+      # @param sluggator [Proc, Symbol] :Algorithm to convert string to slug.
+      # @param source    [Symbol] :Column to get value to be slugged from.
+      # @param target    [Symbol] :Column to write value of the slug to.
+      def self.configure(model, source:, target: DEFAULT_TARGET_COLUMN, sluggator: nil, frozen: nil)
+        # unfreeze
+        model.sluggable_options = model.sluggable_options.dup
+        model.sluggable_options[:source] = source
+        if sluggator
+          if sluggator.respond_to? :intern
+            model.sluggable_options[:sluggator] = sluggator.intern
+          elsif sluggator.respond_to?(:call)
+            model.sluggable_options[:sluggator] = sluggator
+          else
+            raise ArgumentError, "If you provide :sluggator it must respond to `intern` or `call`."
+          end
+        end
+        model.sluggable_options[:target] = target
+        model.sluggable_options[:frozen] = frozen.nil? ? true : !!frozen
         model.sluggable_options.freeze
 
         model.class_eval do
@@ -23,14 +41,21 @@ module Sequel
           # @return [String]
           define_method("#{sluggable_options[:target]}=") do |value|
             sluggator = self.class.sluggable_options[:sluggator]
-            slug = sluggator.call(value, self)   if sluggator.respond_to?(:call)
-            slug ||= self.send(sluggator, value) if sluggator
-            slug ||= to_slug(value)
+            if sluggator
+              if sluggator.respond_to?(:call)
+                slug = sluggator.call(value, self)
+              else
+                slug = self.send(sluggator, value) if sluggator
+              end
+            else
+              slug = to_slug(value)
+            end
             super(slug)
           end
         end
 
       end
+
 
       module ClassMethods
         attr_reader :sluggable_options
@@ -42,41 +67,25 @@ module Sequel
           value.to_s =~ /^\d+$/ ? self[value] : self.find_by_slug(value)
         end
 
+
         # Finds model by Slug column
         #
         # @return [Sequel::Model, nil]
         def find_by_slug(value)
-          self[@sluggable_options[:target] => value.chomp]
+          self[sluggable_options[:target] => value.chomp]
         end
 
-        # Propagate settings to the child classes
-        #
-        # @param [Class] Child class
-        def inherited(klass)
-          super
-          klass.sluggable_options = self.sluggable_options.dup
+
+        def sluggable_options=( opts )
+          self.sluggable_options.replace opts
         end
 
-        # Set the plugin options
-        #
-        # Options:
-        # @param [Hash] plugin options
-        # @option frozen    [Boolean]      :Is slug frozen, default true
-        # @option sluggator [Proc, Symbol] :Algorithm to convert string to slug.
-        # @option source    [Symbol] :Column to get value to be slugged from.
-        # @option target    [Symbol] :Column to write value of the slug to.
-        def sluggable_options=(options)
-          raise ArgumentError, "You must provide :source column" unless options[:source]
-          sluggator = options[:sluggator]
-          if sluggator && !sluggator.is_a?(Symbol) && !sluggator.respond_to?(:call)
-            raise ArgumentError, "If you provide :sluggator it must be Symbol or callable." 
-          end
-          options[:source]    = options[:source].to_sym
-          options[:target]    = options[:target] ? options[:target].to_sym : DEFAULT_TARGET_COLUMN
-          options[:frozen]    = options[:frozen].nil? ? true : !!options[:frozen]
-          @sluggable_options  = options
+
+        def sluggable_options
+          @sluggable_options ||= {}
         end
       end
+
 
       module InstanceMethods
 
@@ -86,14 +95,16 @@ module Sequel
           target = self.class.sluggable_options[:target]
           set_target_column unless self.send(target)
         end
-        
+
+
         # Sets a slug column to the slugged value
         def before_update
           super
-          target = self.class.sluggable_options[:target]
-          frozen = self.class.sluggable_options[:frozen]
-          set_target_column if !self.send(target) || !frozen
+          self.class.sluggable_options[:frozen] ||
+            self.send(self.class.sluggable_options[:target]) ||
+              set_target_column
         end
+
 
         private
 
@@ -102,8 +113,9 @@ module Sequel
         # @param [String] String to be slugged
         # @return [String]
         def to_slug(value)
-          value.chomp.downcase.gsub(/[^a-z0-9]+/,'-')
+          value.strip.downcase.gsub(/[^a-z0-9]+/,'-')
         end
+
 
         # Sets target column with source column which 
         # effectively triggers slug generation

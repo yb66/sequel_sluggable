@@ -1,4 +1,19 @@
-== 0.0.6, 2010-05-02
+# Changes #
+
+## 2nd of December 2017 ##
+
+* Updated layout of library to conform to Sequel v5 plugin standard.
+* Removed subclassing feature, not sure what it was for.
+* Changed spec to use given/when syntax and generally update and sandbox tests from each other.
+* Added yard doc and updated files to be markdown or txt to cut down on yard complaints.
+* Added simplecov, 100% nice!
+* Simplified some the logic a bit, I don't mind a few extra lines.
+* A bit of freezing (of the hash) and defaulting for the getter.
+
+----
+
+
+## 0.0.6, 2010-05-02
 * Make Rakefile and gemspec sane
 * Fix the strucutre of the gem
 * Update RSpecHleper to work with the latest code.

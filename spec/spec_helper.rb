@@ -1,21 +1,23 @@
-$LOAD_PATH.unshift(File.dirname(__FILE__))
-$LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
-require 'sequel'
-require 'sequel_sluggable'
-require 'spec'
-require 'spec/autorun'
+require 'rspec'
+require 'rspec/its'
+require 'rspec/given'
 
-# Create model to test on
-DB = Sequel.sqlite
-DB.create_table :items do
-  primary_key :id
-  String :name
-  String :slug
-  String :sluggie
+if ENV["DEBUG"]
+  require 'pry-byebug'
+  require 'pry-state'
+  binding.pry
 end
 
-class Item < Sequel::Model; end
-
-Spec::Runner.configure do |config|
-  config.after(:each)  { Item.delete }
+# code coverage
+require 'simplecov'
+SimpleCov.start do
+  add_filter "/vendor/"
+  # for OSX
+  add_filter "/vendor.noindex/"
+  add_filter "/bin/"
+  add_filter "/spec/"
 end
+
+
+# RSpec.configure do |config|
+# end
