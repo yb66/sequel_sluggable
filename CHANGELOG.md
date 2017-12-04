@@ -1,6 +1,6 @@
 # Changes #
 
-## 2nd of December 2017 ##
+## v0.1.0, 2nd of December 2017 ##
 
 * Updated layout of library to conform to Sequel v5 plugin standard.
 * Removed subclassing feature, not sure what it was for.
