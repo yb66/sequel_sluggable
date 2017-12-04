@@ -1,26 +1,21 @@
-#!/usr/bin/env gem build
-# -*- encoding: utf-8 -*-
+$:.push File.expand_path("../lib", __FILE__)
+require "sequel/plugins/sluggable/version"
 
-require 'date'
-require 'lib/sequel_sluggable/version'
+Gem::Specification.new do |s|
+  s.name     = 'sequel_sluggable'
+  s.version  = Sequel::Plugins::Sluggable::VERSION
+  s.authors  = ['Pavel Kunc']
+  s.email = 'pavel.kunc@gmail.com'
+  s.homepage = 'http://github.com/pk/sequel_sluggable'
+  s.summary = 'Sequel plugin which provides Slug functionality for model.'
+  s.description = s.summary
+  s.license     = 'MIT'
 
-Gem::Specification.new do |gem|
-  gem.name     = 'sequel_sluggable'
-  gem.version  = Sequel::Plugins::Sluggable::VERSION.dup
-  gem.authors  = ['Pavel Kunc']
-  gem.date     = Date.today.to_s
-  gem.email = 'pavel.kunc@gmail.com'
-  gem.homepage = 'http://github.com/pk/sequel_sluggable'
-  gem.summary = 'Sequel plugin which provides Slug functionality for model.'
-  gem.description = gem.summary
+  s.files         = `git ls-files`.split("\n")
+  s.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")
+  s.executables   = `git ls-files -- bin/*`.split("\n").map{ |f| File.basename(f) }
 
-  gem.has_rdoc = true 
-  gem.require_paths = ['lib']
-  gem.extra_rdoc_files = ['README.rdoc', 'LICENSE', 'CHANGELOG']
-  gem.files = Dir['Rakefile', '{lib,spec}/**/*', 'README*', 'LICENSE*', 'CHANGELOG*'] & `git ls-files -z`.split("\0")
+  s.add_dependency 'sequel', "~>5.0"
 
-  gem.add_dependency 'sequel', ">= 3.0.0"
-  gem.add_development_dependency 'sqlite3-ruby'
-  gem.add_development_dependency 'rspec'
-  gem.add_development_dependency 'yard'
+  s.require_paths = ["lib"]
 end
